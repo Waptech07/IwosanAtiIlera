@@ -9,6 +9,9 @@ import ProductFilters from "@/components/products/ProductFilters";
 import ProductGrid from "@/components/products/ProductGrid";
 import ProductPagination from "@/components/products/ProductPagination";
 
+// Force dynamic rendering to bypass prerendering
+export const dynamic = "force-dynamic";
+
 export default function ProductsPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
