@@ -1,26 +1,55 @@
 @import "tailwindcss";
+@import "swiper/css";
+@import "swiper/css/effect-fade";
+@import "swiper/css/navigation";
+@import "swiper/css/pagination";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+* {
+  @apply transition-colors duration-200;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+html {
+  scroll-behavior: smooth;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+@theme {
+  /* Light Mode Colors */
+  --color-cream: #fffbeb;
+  --color-charcoal: #1f2937;
+  --color-primary: #d97706;
+  --color-secondary: #4d7c0f;
+  --color-accent: #b45309;
+  --color-training: #0f766e;
+
+  /* Dark Mode Colors */
+  --color-dark-background: #1f2937;
+  --color-dark-text: #f3f4f6;
+  --color-dark-primary: #f59e0b;
+  --color-dark-secondary: #65a30d;
+  --color-dark-accent: #d97706;
+  --color-dark-training: #0d9488;
+
+  /* Fonts */
+  --font-sans: var(--font-lato);
+  --font-heading: var(--font-playfair);
+  --font-accent: var(--font-cormorant);
 }
 
+/* Apply theme colors to body */
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  @apply bg-cream text-charcoal;
+}
+
+.dark body {
+  @apply bg-dark-background text-dark-text;
+}
+
+/* Swiper custom styles */
+.swiper-button-prev,
+.swiper-button-next {
+  @apply after:hidden;
+}
+
+.swiper-pagination-bullet-active {
+  @apply !bg-primary dark:!bg-dark-primary !scale-125;
 }
