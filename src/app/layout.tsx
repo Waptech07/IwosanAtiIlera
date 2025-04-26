@@ -6,6 +6,7 @@ import Footer from "@/components/Footer";
 import ScrollToTop from "@/components/ScrollToTop";
 import ThemeProvider from "@/theme/theme-provider";
 import ThemeToggle from "@/theme/theme-toggle";
+import ClientQueryProvider from "@/components/ClientQueryProvider";
 
 const playfair = Playfair_Display({
   subsets: ["latin"],
@@ -73,21 +74,23 @@ export default function RootLayout({
           font-body min-h-screen flex flex-col
         `}
       >
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-          storageKey="iwosan-theme"
-        >
-          <Navbar />
-          <div className="relative flex-grow">
-            <ThemeToggle />
-            <ScrollToTop />
-            <main className="flex-grow">{children}</main>
-          </div>
-          <Footer />
-        </ThemeProvider>
+        <ClientQueryProvider>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+            storageKey="iwosan-theme"
+          >
+            <Navbar />
+            <div className="relative flex-grow">
+              <ThemeToggle />
+              <ScrollToTop />
+              <main className="flex-grow">{children}</main>
+            </div>
+            <Footer />
+          </ThemeProvider>
+        </ClientQueryProvider>
       </body>
     </html>
   );

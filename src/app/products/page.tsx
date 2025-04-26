@@ -1,139 +1,182 @@
 "use client";
 
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useEffect } from "react";
 import { useTheme } from "next-themes";
-import { getProducts, getCategories } from "@/lib/api";
+import { useQueries } from "@tanstack/react-query";
+import { fetchProducts, fetchCategories, Product, Category } from "@/lib/api";
 import ProductFilters from "@/components/products/ProductFilters";
-
-// Define interfaces (copied from src/lib/api.ts for clarity)
-interface Product {
-  id: number;
-  title: string;
-  description: string;
-  price: string;
-  category: string;
-  images: string[];
-  inStock?: boolean;
-  slug: string;
-}
-
-interface Category {
-  id: number;
-  name: string;
-  description: string;
-}
+import ProductGrid from "@/components/products/ProductGrid";
+import ProductPagination from "@/components/products/ProductPagination";
 
 export default function ProductsPage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const { theme } = useTheme();
-  const [products, setProducts] = useState<Product[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [filters, setFilters] = useState({
-    selectedCategory: "",
-    searchInput: "",
-    descInput: "",
-    priceMin: "0",
-    priceMax: "1000000",
-    inStockFilter: false,
-    sort: "",
-    page: "1",
-  });
   const [mounted, setMounted] = useState(false);
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  // Fetch products and categories using React Query
+  const [productsQuery, categoriesQuery] = useQueries({
+    queries: [
+      {
+        queryKey: ["products"],
+        queryFn: fetchProducts,
+      },
+      {
+        queryKey: ["categories"],
+        queryFn: fetchCategories,
+      },
+    ],
+  });
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        const [productsData, categoriesData] = await Promise.all([
-          getProducts(),
-          getCategories(),
-        ]);
+  const products = productsQuery.data || [];
+  const categories = categoriesQuery.data || [];
+  const loading = productsQuery.isLoading || categoriesQuery.isLoading;
+  const error = productsQuery.error || categoriesQuery.error;
 
-        let filteredProducts = productsData;
+  // Extract query parameters
+  const category = searchParams.get("category") || "";
+  const search = searchParams.get("search") || "";
+  const desc = searchParams.get("desc") || "";
+  const priceRange = searchParams.get("price_range") || "";
+  const inStock = searchParams.get("in_stock") || "";
+  const sort = searchParams.get("sort") || "";
+  const page = parseInt(searchParams.get("page") || "1");
 
-        // Apply category filter
-        if (filters.selectedCategory) {
-          filteredProducts = filteredProducts.filter(
-            (p) => p.category.toLowerCase() === filters.selectedCategory
-          );
-        }
+  // Filter states
+  const [searchInput, setSearchInput] = useState<string>(search);
+  const [descInput, setDescInput] = useState<string>(desc);
+  const [priceMin, setPriceMin] = useState<string>(
+    priceRange.split("-")[0] || "0"
+  );
+  const [priceMax, setPriceMax] = useState<string>(
+    priceRange.split("-")[1] || "1000000"
+  );
+  const [inStockFilter, setInStockFilter] = useState<boolean>(
+    inStock === "true"
+  );
+  const [selectedCategory, setSelectedCategory] = useState<string>(category);
 
-        // Apply search by name
-        if (filters.searchInput) {
-          filteredProducts = filteredProducts.filter((p) =>
-            p.title.toLowerCase().includes(filters.searchInput.toLowerCase())
-          );
-        }
+  // Pagination
+  const productsPerPage = 12;
+  const totalPages = Math.ceil(products.length / productsPerPage);
 
-        // Apply search by description
-        if (filters.descInput) {
-          filteredProducts = filteredProducts.filter((p) =>
-            p.description
-              .toLowerCase()
-              .includes(filters.descInput.toLowerCase())
-          );
-        }
+  // Filter products
+  const filteredProducts = products.filter((product: Product) => {
+    const matchesCategory = selectedCategory
+      ? product.category.toLowerCase() === selectedCategory.toLowerCase()
+      : true;
+    const matchesSearch = search
+      ? product.title.toLowerCase().includes(search.toLowerCase())
+      : true;
+    const matchesDesc = desc
+      ? product.description.toLowerCase().includes(desc.toLowerCase())
+      : true;
+    const [min, max] = [parseInt(priceMin), parseInt(priceMax)];
+    const productPrice = parseInt(product.price);
+    const matchesPrice =
+      priceMin && priceMax && !isNaN(min) && !isNaN(max)
+        ? productPrice >= min && productPrice <= max
+        : true;
+    const matchesStock = inStock === "true" ? product.inStock : true;
 
-        // Apply price range
-        filteredProducts = filteredProducts.filter((p) => {
-          const price = parseInt(p.price);
-          return (
-            price >= parseInt(filters.priceMin) &&
-            price <= parseInt(filters.priceMax)
-          );
-        });
+    return (
+      matchesCategory &&
+      matchesSearch &&
+      matchesDesc &&
+      matchesPrice &&
+      matchesStock
+    );
+  });
 
-        // Apply in stock filter
-        if (filters.inStockFilter) {
-          filteredProducts = filteredProducts.filter((p) => p.inStock);
-        }
-
-        // Apply sorting
-        if (filters.sort) {
-          filteredProducts = [...filteredProducts].sort((a, b) => {
-            if (filters.sort === "price-asc")
-              return parseInt(a.price) - parseInt(b.price);
-            if (filters.sort === "price-desc")
-              return parseInt(b.price) - parseInt(a.price);
-            if (filters.sort === "name-asc")
-              return a.title.localeCompare(b.title);
-            if (filters.sort === "name-desc")
-              return b.title.localeCompare(a.title);
-            return 0;
-          });
-        }
-
-        setProducts(filteredProducts);
-        setCategories(categoriesData);
-      } catch (err) {
-        setError("Failed to load products or categories.");
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, [filters]);
-
-  if (!mounted) {
-    return null;
+  // Sort products
+  let sortedProducts = [...filteredProducts];
+  if (sort) {
+    if (sort === "price-asc")
+      sortedProducts.sort(
+        (a: Product, b: Product) => parseInt(a.price) - parseInt(b.price)
+      );
+    if (sort === "price-desc")
+      sortedProducts.sort(
+        (a: Product, b: Product) => parseInt(b.price) - parseInt(a.price)
+      );
+    if (sort === "name-asc")
+      sortedProducts.sort((a: Product, b: Product) =>
+        a.title.localeCompare(b.title)
+      );
+    if (sort === "name-desc")
+      sortedProducts.sort((a: Product, b: Product) =>
+        b.title.localeCompare(a.title)
+      );
   }
+
+  // Paginate sorted products
+  const startIndex = (page - 1) * productsPerPage;
+  const paginatedProducts = sortedProducts.slice(
+    startIndex,
+    startIndex + productsPerPage
+  );
+
+  // Update URL with filters
+  const updateFilters = (newParams: Record<string, string>) => {
+    const params = new URLSearchParams(searchParams.toString());
+    Object.entries(newParams).forEach(([key, value]) => {
+      if (value) params.set(key, value);
+      else params.delete(key);
+    });
+    router.push(`/products?${params.toString()}`);
+  };
+
+  // Handle filter changes
+  const handleSearch = () => updateFilters({ search: searchInput, page: "1" });
+  const handleDesc = () => updateFilters({ desc: descInput, page: "1" });
+  const handlePriceRange = () => {
+    if (priceMin && priceMax) {
+      updateFilters({ price_range: `${priceMin}-${priceMax}`, page: "1" });
+    }
+  };
+  const handleInStock = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setInStockFilter(e.target.checked);
+    updateFilters({ in_stock: e.target.checked ? "true" : "", page: "1" });
+  };
+  const handleCategory = (cat: string) => {
+    setSelectedCategory(cat);
+    updateFilters({ category: cat, page: "1" });
+  };
+  const handlePageChange = (newPage: number) => {
+    if (newPage < 1 || newPage > totalPages) return;
+    updateFilters({ page: newPage.toString() });
+  };
 
   const textColor = theme === "dark" ? "text-dark-text" : "text-charcoal";
   const bgColor = theme === "dark" ? "bg-dark-background" : "bg-cream";
   const borderColor =
     theme === "dark" ? "border-dark-primary/30" : "border-primary/30";
 
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    return null; // Prevent rendering until hydrated
+  }
+
   if (error) {
     return (
       <div className={`min-h-screen ${bgColor} ${textColor} py-8 text-center`}>
-        <p>{error}</p>
+        <p className={`text-lg font-body ${textColor}`}>
+          Failed to load products. Please try again later.
+        </p>
+        <button
+          onClick={() => window.location.reload()}
+          className={`mt-4 px-6 py-2 rounded-md font-body ${
+            theme === "dark"
+              ? "bg-dark-primary hover:bg-dark-accent text-dark-text"
+              : "bg-primary hover:bg-accent text-cream"
+          } transition-all hover:scale-105`}
+        >
+          Retry
+        </button>
       </div>
     );
   }
@@ -141,46 +184,61 @@ export default function ProductsPage() {
   return (
     <div className={`min-h-screen ${bgColor} ${textColor} py-12`}>
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <h1 className={`text-4xl font-heading ${textColor} mb-8 text-center`}>
-          Products
+        <h1 className={`text-5xl font-heading mb-8 ${textColor} text-center`}>
+          Explore Our Organic Products
         </h1>
 
         <ProductFilters
           categories={categories}
           initialFilters={{
-            selectedCategory: filters.selectedCategory,
-            searchInput: filters.searchInput,
-            descInput: filters.descInput,
-            priceMin: filters.priceMin,
-            priceMax: filters.priceMax,
-            inStockFilter: filters.inStockFilter,
-            sort: filters.sort,
+            selectedCategory,
+            searchInput,
+            descInput,
+            priceMin,
+            priceMax,
+            inStockFilter,
+            sort,
           }}
-          onFilterChange={(newFilters) => setFilters(newFilters)}
+          onFilterChange={(newFilters) => {
+            updateFilters({
+              category: newFilters.selectedCategory,
+              search: newFilters.searchInput,
+              desc: newFilters.descInput,
+              price_range:
+                newFilters.priceMin && newFilters.priceMax
+                  ? `${newFilters.priceMin}-${newFilters.priceMax}`
+                  : "",
+              in_stock: newFilters.inStockFilter ? "true" : "",
+              sort: newFilters.sort,
+              page: newFilters.page,
+            });
+            setSelectedCategory(newFilters.selectedCategory);
+            setSearchInput(newFilters.searchInput);
+            setDescInput(newFilters.descInput);
+            setPriceMin(newFilters.priceMin);
+            setPriceMax(newFilters.priceMax);
+            setInStockFilter(newFilters.inStockFilter);
+          }}
           bgColor={bgColor}
           borderColor={borderColor}
           textColor={textColor}
         />
 
-        {loading ? (
-          <div className={`text-center ${textColor}`}>Loading...</div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {products.map((product) => (
-              <div
-                key={product.id}
-                className={`p-4 rounded-lg ${bgColor} ${borderColor} border shadow-md`}
-              >
-                <h2 className={`text-lg font-heading ${textColor}`}>
-                  {product.title}
-                </h2>
-                <p className={`text-sm ${textColor}`}>{product.description}</p>
-                <p className={`text-lg ${textColor}`}>
-                  ₦{parseInt(product.price).toLocaleString()}
-                </p>
-              </div>
-            ))}
-          </div>
+        <ProductGrid
+          loading={loading}
+          paginatedProducts={paginatedProducts}
+          bgColor={bgColor}
+          borderColor={borderColor}
+          textColor={textColor}
+        />
+
+        {totalPages > 1 && !loading && (
+          <ProductPagination
+            page={page}
+            totalPages={totalPages}
+            handlePageChange={handlePageChange}
+            borderColor={borderColor}
+          />
         )}
       </div>
     </div>

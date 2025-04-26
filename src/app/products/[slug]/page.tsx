@@ -4,24 +4,11 @@ import Image from "next/image";
 import Link from "next/link";
 import { useTheme } from "next-themes";
 import { useState, useEffect } from "react";
-import { getProductBySlug, getProducts } from "@/lib/api"; // Import Product interface
+import { useQuery } from "@tanstack/react-query";
+import { fetchProductBySlug, fetchProducts, Product } from "@/lib/api";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination, Autoplay } from "swiper/modules";
-
-
-interface Product {
-  id: number;
-  title: string;
-  description: string;
-  price: string;
-  category: string;
-  images: string[];
-  stock: number;
-  inStock?: boolean;
-  slug: string;
-  created_at: string;
-  updated_at: string;
-}
+import React from "react";
 
 // Skeleton Loader for Product Details
 const SkeletonDetail = () => (
@@ -70,46 +57,51 @@ const ImageCarousel = ({ images }: { images: string[] }) => {
   );
 };
 
+// Define the type for params (the resolved value after unwrapping the Promise)
+interface ProductDetailsParams {
+  slug: string;
+}
+
 export default function ProductDetails({
-  params,
+  params: paramsPromise,
 }: {
-  params: { slug: string };
+  params: Promise<ProductDetailsParams>;
 }) {
+  // Unwrap the params Promise using React.use()
+  const params = React.use(paramsPromise);
   const { slug } = params;
+
   const { theme } = useTheme();
-  const [product, setProduct] = useState<Product | null>(null);
-  const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        const productData = await getProductBySlug(slug);
-        console.log("Product data:", productData);
-        setProduct(productData);
+  // Fetch product by slug using React Query
+  const {
+    data: product,
+    isLoading: productLoading,
+    error: productError,
+  } = useQuery<Product>({
+    queryKey: ["product", slug],
+    queryFn: () => fetchProductBySlug(slug),
+  });
 
-        if (productData) {
-          const allProducts = await getProducts();
-          const related = allProducts
-            .filter(
-              (p: Product) =>
-                p.category === productData.category && p.slug !== slug
-            )
-            .slice(0, 4);
-          setRelatedProducts(related);
-        }
-      } catch (err) {
-        console.error("Fetch error:", err);
-        setError("Failed to load product details. Please try again later.");
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
-  }, [slug]);
+  // Fetch all products for related products using React Query
+  const {
+    data: allProducts = [],
+    isLoading: productsLoading,
+    error: productsError,
+  } = useQuery<Product[]>({
+    queryKey: ["products"],
+    queryFn: fetchProducts,
+    enabled: !!product, // Only fetch after product is loaded
+  });
+
+  // Compute related products
+  const relatedProducts = allProducts
+    .filter(
+      (p: Product) =>
+        product && p.category === product.category && p.slug !== slug
+    )
+    .slice(0, 4);
 
   // Ensure the component only renders after hydration
   useEffect(() => {
@@ -125,10 +117,13 @@ export default function ProductDetails({
   const borderColor =
     theme === "dark" ? "border-dark-primary/30" : "border-primary/30";
 
+  const error = productError || productsError;
+  const loading = productLoading || productsLoading;
+
   if (error) {
     return (
       <div className={`min-h-screen ${bgColor} ${textColor} py-8 text-center`}>
-        <p>{error}</p>
+        <p>Failed to load product details. Please try again later.</p>
         <Link
           href="/products"
           className={`mt-4 inline-block px-6 py-2 rounded-md font-body ${

@@ -1,7 +1,7 @@
 import Link from "next/link";
-import Image from "next/image";
 import { useTheme } from "next-themes";
 import { motion } from "framer-motion";
+import ProductImage from "../ProductImage";
 
 interface Product {
   id: number;
@@ -38,10 +38,11 @@ export default function ProductCard({
     >
       <Link href={`/products/${product.slug}`}>
         <div className="relative w-full aspect-square">
-          <Image
+          <ProductImage
             src={product.images[0] || "/placeholder.jpg"}
             alt={product.title}
-            fill
+            width={400}
+            height={400}
             className="object-cover rounded-t-2xl"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-charcoal/60 dark:from-dark-background/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">

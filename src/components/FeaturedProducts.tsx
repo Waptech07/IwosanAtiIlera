@@ -1,64 +1,59 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Link from "next/link";
 import ProductCard from "./products/ProductCard";
-import { getProducts } from "@/lib/api";
+import { useQuery } from "@tanstack/react-query";
+import { fetchProducts, Product } from "@/lib/api";
 import { useTheme } from "next-themes";
-
-interface Product {
-  id: number;
-  title: string;
-  description: string;
-  price: string;
-  category: string;
-  images: string[];
-  inStock?: boolean;
-  slug: string;
-}
+import { useEffect, useState } from "react";
 
 export default function FeaturedProducts() {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const { theme } = useTheme();
+  const [mounted, setMounted] = useState(false);
 
+  // Fetch products using React Query
+  const {
+    data: products = [],
+    isLoading,
+    error,
+  } = useQuery<Product[]>({
+    queryKey: ["products"], // Unique key for caching
+    queryFn: fetchProducts,
+  });
+
+  // Ensure the component only renders after hydration
   useEffect(() => {
-    async function fetchProducts() {
-      try {
-        const data = await getProducts();
-        setProducts(data.slice(0, 6));
-      } catch (err) {
-        setError("Failed to load products");
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    }
-    fetchProducts();
+    setMounted(true);
   }, []);
+
+  if (!mounted) {
+    return null; // Prevent rendering until hydrated
+  }
 
   const textColor = theme === "dark" ? "text-dark-text" : "text-charcoal";
   const bgColor = theme === "dark" ? "bg-dark-background" : "bg-cream";
   const borderColor =
     theme === "dark" ? "border-dark-primary/30" : "border-primary/30";
 
+  // Limit to 6 featured products
+  const featuredProducts = products.slice(0, 6);
+
   return (
     <section className="container mx-auto px-4 py-12">
       <h2 className={`font-heading text-3xl ${textColor} mb-8 text-center`}>
         Featured Products
       </h2>
-      {loading && (
+      {isLoading && (
         <div className={`text-center ${textColor} font-body`}>Loading...</div>
       )}
       {error && (
         <div className="text-center text-red-500 dark:text-red-400 font-body">
-          {error}
+          Failed to load products
         </div>
       )}
-      {!loading && !error && (
+      {!isLoading && !error && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {products.map((product) => (
+          {featuredProducts.map((product) => (
             <ProductCard
               key={product.id}
               product={product}

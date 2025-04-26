@@ -74,84 +74,17 @@ export default function ProductFilters({
     setSort(initialFilters.sort);
   }, [initialFilters]);
 
-  const handleCategory = (cat: string) => {
-    setSelectedCategory(cat);
+  const handleFilterChange = (
+    newFilters: Partial<ProductFiltersProps["initialFilters"]>
+  ) => {
     onFilterChange({
-      selectedCategory: cat,
-      searchInput,
-      descInput,
-      priceMin,
-      priceMax,
-      inStockFilter,
-      sort,
-      page: "1",
-    });
-  };
-
-  const handleSearch = () => {
-    onFilterChange({
-      selectedCategory,
-      searchInput,
-      descInput,
-      priceMin,
-      priceMax,
-      inStockFilter,
-      sort,
-      page: "1",
-    });
-  };
-
-  const handleDesc = () => {
-    onFilterChange({
-      selectedCategory,
-      searchInput,
-      descInput,
-      priceMin,
-      priceMax,
-      inStockFilter,
-      sort,
-      page: "1",
-    });
-  };
-
-  const handlePriceRange = () => {
-    onFilterChange({
-      selectedCategory,
-      searchInput,
-      descInput,
-      priceMin,
-      priceMax,
-      inStockFilter,
-      sort,
-      page: "1",
-    });
-  };
-
-  const handleInStock = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newValue = e.target.checked;
-    setInStockFilter(newValue);
-    onFilterChange({
-      selectedCategory,
-      searchInput,
-      descInput,
-      priceMin,
-      priceMax,
-      inStockFilter: newValue,
-      sort,
-      page: "1",
-    });
-  };
-
-  const handleSort = (sortValue: string) => {
-    setSort(sortValue);
-    onFilterChange({
-      selectedCategory,
-      searchInput,
-      descInput,
-      priceMin,
-      priceMax,
-      inStockFilter,
-      sort: sortValue,
+      selectedCategory: newFilters.selectedCategory ?? selectedCategory,
+      searchInput: newFilters.searchInput ?? searchInput,
+      descInput: newFilters.descInput ?? descInput,
+      priceMin: newFilters.priceMin ?? priceMin,
+      priceMax: newFilters.priceMax ?? priceMax,
+      inStockFilter: newFilters.inStockFilter ?? inStockFilter,
+      sort: newFilters.sort ?? sort,
       page: "1",
     });
   };
@@ -196,7 +129,10 @@ export default function ProductFilters({
             <select
               title="selectedCategory"
               value={selectedCategory}
-              onChange={(e) => handleCategory(e.target.value)}
+              onChange={(e) => {
+                setSelectedCategory(e.target.value);
+                handleFilterChange({ selectedCategory: e.target.value });
+              }}
               className={`w-full px-5 py-4 rounded-xl border-2 ${borderColor} ${bgColor} ${textColor} 
                 focus:outline-none focus:ring-4 focus:ring-primary/20 dark:focus:ring-dark-primary/30
                 transition-all duration-300 appearance-none font-medium
@@ -228,7 +164,10 @@ export default function ProductFilters({
             <input
               type="text"
               value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
+              onChange={(e) => {
+                setSearchInput(e.target.value);
+                handleFilterChange({ searchInput: e.target.value });
+              }}
               className={`w-full px-5 py-4 rounded-xl border-2 ${borderColor} ${bgColor} ${textColor}
                 focus:outline-none focus:ring-4 focus:ring-primary/20 dark:focus:ring-dark-primary/30
                 transition-all duration-300 pr-14
@@ -236,7 +175,7 @@ export default function ProductFilters({
               placeholder="Organic honey..."
             />
             <button
-              onClick={handleSearch}
+              onClick={() => handleFilterChange({ searchInput })}
               className={`absolute right-2 top-1/2 -translate-y-1/2 p-3 rounded-xl
                 ${
                   theme === "dark"
@@ -261,7 +200,10 @@ export default function ProductFilters({
             <input
               type="text"
               value={descInput}
-              onChange={(e) => setDescInput(e.target.value)}
+              onChange={(e) => {
+                setDescInput(e.target.value);
+                handleFilterChange({ descInput: e.target.value });
+              }}
               className={`w-full px-5 py-4 rounded-xl border-2 ${borderColor} ${bgColor} ${textColor}
                 focus:outline-none focus:ring-4 focus:ring-primary/20 dark:focus:ring-dark-primary/30
                 transition-all duration-300 pr-14
@@ -269,7 +211,7 @@ export default function ProductFilters({
               placeholder="Natural remedies..."
             />
             <button
-              onClick={handleDesc}
+              onClick={() => handleFilterChange({ descInput })}
               className={`absolute right-2 top-1/2 -translate-y-1/2 p-3 rounded-xl
                 ${
                   theme === "dark"
@@ -294,7 +236,10 @@ export default function ProductFilters({
             <select
               title="Select Sorting"
               value={sort}
-              onChange={(e) => handleSort(e.target.value)}
+              onChange={(e) => {
+                setSort(e.target.value);
+                handleFilterChange({ sort: e.target.value });
+              }}
               className={`w-full px-5 py-4 rounded-xl border-2 ${borderColor} ${bgColor} ${textColor} 
                 focus:outline-none focus:ring-4 focus:ring-primary/20 dark:focus:ring-dark-primary/30
                 transition-all duration-300 appearance-none font-medium
@@ -342,7 +287,10 @@ export default function ProductFilters({
                   min="0"
                   max="20000"
                   value={priceMin}
-                  onChange={(e) => setPriceMin(e.target.value)}
+                  onChange={(e) => {
+                    setPriceMin(e.target.value);
+                    handleFilterChange({ priceMin: e.target.value });
+                  }}
                   className="absolute w-full top-0 opacity-0 cursor-pointer"
                 />
                 <input
@@ -351,13 +299,16 @@ export default function ProductFilters({
                   min="0"
                   max="1000000"
                   value={priceMax}
-                  onChange={(e) => setPriceMax(e.target.value)}
+                  onChange={(e) => {
+                    setPriceMax(e.target.value);
+                    handleFilterChange({ priceMax: e.target.value });
+                  }}
                   className="absolute w-full top-0 opacity-0 cursor-pointer"
                 />
               </div>
             </div>
             <button
-              onClick={handlePriceRange}
+              onClick={() => handleFilterChange({ priceMin, priceMax })}
               className={`self-end flex items-center gap-2 px-5 py-3 rounded-xl font-medium
                 ${
                   theme === "dark"
@@ -389,7 +340,10 @@ export default function ProductFilters({
               <input
                 type="checkbox"
                 checked={inStockFilter}
-                onChange={handleInStock}
+                onChange={(e) => {
+                  setInStockFilter(e.target.checked);
+                  handleFilterChange({ inStockFilter: e.target.checked });
+                }}
                 className="absolute inset-0 opacity-0 cursor-pointer"
               />
             </div>

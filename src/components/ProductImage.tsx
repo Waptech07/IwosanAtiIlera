@@ -17,7 +17,7 @@ export default function ProductImage({
   height,
   className,
 }: ProductImageProps) {
-  // Construct full backend URL for development
+
   const baseUrl =
     process.env.NEXT_PUBLIC_API_URL?.replace("/api/v1/products", "") ||
     "http://localhost:8000";
@@ -25,9 +25,15 @@ export default function ProductImage({
     ? `${baseUrl}${src}`
     : src || "/placeholder.jpg";
 
+  // Ensure the image URL is valid
+  const finalImageUrl =
+    imageUrl.startsWith("http") || imageUrl.startsWith("/")
+      ? imageUrl
+      : "/placeholder.jpg";
+
   return (
     <Image
-      src={imageUrl}
+      src={finalImageUrl}
       alt={alt}
       width={width}
       height={height}
