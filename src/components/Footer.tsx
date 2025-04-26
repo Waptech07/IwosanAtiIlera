@@ -4,6 +4,9 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import LogoImage from "@/app/images/logo.png";
+import FacebookImage from "@/app/images/facebook.png"
+import InstagramImage from "@/app/images/instagram.png"
+import XImage from "@/app/images/x.png"
 import { useTheme } from "next-themes";
 
 export default function Footer() {
@@ -95,10 +98,10 @@ export default function Footer() {
               rel="noopener noreferrer"
             >
               <Image
-                src="/facebook.svg"
+                src={FacebookImage}
                 alt="Facebook"
-                width={24}
-                height={24}
+                width={40}
+                height={40}
                 className="text-primary dark:text-dark-primary hover:text-accent dark:hover:text-dark-accent transition-colors"
               />
             </a>
@@ -108,10 +111,10 @@ export default function Footer() {
               rel="noopener noreferrer"
             >
               <Image
-                src="/twitter.svg"
+                src={XImage}
                 alt="Twitter"
-                width={24}
-                height={24}
+                width={40}
+                height={40}
                 className="text-primary dark:text-dark-primary hover:text-accent dark:hover:text-dark-accent transition-colors"
               />
             </a>
@@ -121,10 +124,10 @@ export default function Footer() {
               rel="noopener noreferrer"
             >
               <Image
-                src="/instagram.svg"
+                src={InstagramImage}
                 alt="Instagram"
-                width={24}
-                height={24}
+                width={40}
+                height={40}
                 className="text-primary dark:text-dark-primary hover:text-accent dark:hover:text-dark-accent transition-colors"
               />
             </a>
