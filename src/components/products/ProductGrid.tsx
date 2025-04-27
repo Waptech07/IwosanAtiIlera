@@ -21,6 +21,7 @@ interface ProductGridProps {
   bgColor: string;
   borderColor: string;
   textColor: string;
+  onClearFilters: () => void;
 }
 
 export default function ProductGrid({
@@ -29,6 +30,7 @@ export default function ProductGrid({
   bgColor,
   borderColor,
   textColor,
+  onClearFilters,
 }: ProductGridProps) {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -64,7 +66,7 @@ export default function ProductGrid({
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              // onClick={() => updateFilters({})}
+              onClick={onClearFilters} 
               className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-full bg-primary text-white hover:bg-primary/90 dark:bg-dark-primary dark:hover:bg-dark-primary/90 transition-all shadow-lg hover:shadow-xl"
             >
               <XMarkIcon className="h-5 w-5" />

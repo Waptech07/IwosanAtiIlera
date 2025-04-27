@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useTheme } from "next-themes";
 import { useQueries } from "@tanstack/react-query";
 import { fetchProducts, fetchCategories, Product, Category } from "@/lib/api";
@@ -205,49 +205,66 @@ export default function ProductsPage() {
         <h1 className={`text-5xl font-heading mb-8 ${textColor} text-center`}>
           Our Collection
         </h1>
-
-        <ProductFilters
-          categories={categories}
-          initialFilters={{
-            selectedCategory,
-            searchInput,
-            descInput,
-            priceMin,
-            priceMax,
-            inStockFilter,
-            sort,
-          }}
-          onFilterChange={(newFilters) => {
-            updateFilters({
-              category: newFilters.selectedCategory,
-              search: newFilters.searchInput,
-              desc: newFilters.descInput,
-              price_range:
-                newFilters.priceMin && newFilters.priceMax
-                  ? `${newFilters.priceMin}-${newFilters.priceMax}`
-                  : "",
-              in_stock: newFilters.inStockFilter ? "true" : "",
-              sort: newFilters.sort,
-              page: newFilters.page,
-            });
-            setSelectedCategory(newFilters.selectedCategory);
-            setSearchInput(newFilters.searchInput);
-            setDescInput(newFilters.descInput);
-            setPriceMin(newFilters.priceMin);
-            setPriceMax(newFilters.priceMax);
-            setInStockFilter(newFilters.inStockFilter);
-          }}
-          bgColor={bgColor}
-          borderColor={borderColor}
-          textColor={textColor}
-        />
-
+        <Suspense fallback={<div>Loading product filters...</div>}>
+          <ProductFilters
+            categories={categories}
+            initialFilters={{
+              selectedCategory,
+              searchInput,
+              descInput,
+              priceMin,
+              priceMax,
+              inStockFilter,
+              sort,
+            }}
+            onFilterChange={(newFilters) => {
+              updateFilters({
+                category: newFilters.selectedCategory,
+                search: newFilters.searchInput,
+                desc: newFilters.descInput,
+                price_range:
+                  newFilters.priceMin && newFilters.priceMax
+                    ? `${newFilters.priceMin}-${newFilters.priceMax}`
+                    : "",
+                in_stock: newFilters.inStockFilter ? "true" : "",
+                sort: newFilters.sort,
+                page: newFilters.page,
+              });
+              setSelectedCategory(newFilters.selectedCategory);
+              setSearchInput(newFilters.searchInput);
+              setDescInput(newFilters.descInput);
+              setPriceMin(newFilters.priceMin);
+              setPriceMax(newFilters.priceMax);
+              setInStockFilter(newFilters.inStockFilter);
+            }}
+            bgColor={bgColor}
+            borderColor={borderColor}
+            textColor={textColor}
+          />
+        </Suspense>
         <ProductGrid
           loading={loading}
           paginatedProducts={paginatedProducts}
           bgColor={bgColor}
           borderColor={borderColor}
           textColor={textColor}
+          onClearFilters={() => {
+            setSelectedCategory("");
+            setSearchInput("");
+            setDescInput("");
+            setPriceMin("0");
+            setPriceMax("1000000");
+            setInStockFilter(false);
+            updateFilters({
+              category: "",
+              search: "",
+              desc: "",
+              price_range: "",
+              in_stock: "",
+              sort: "",
+              page: "1",
+            });
+          }}
         />
 
         {totalPages > 1 && !loading && (
