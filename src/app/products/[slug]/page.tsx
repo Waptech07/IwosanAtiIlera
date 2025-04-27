@@ -9,6 +9,9 @@ import { fetchProductBySlug, fetchProducts, Product } from "@/lib/api";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination, Autoplay } from "swiper/modules";
 import React from "react";
+import { ArrowPathIcon } from "@heroicons/react/24/solid";
+import { motion } from "framer-motion";
+import { ExclamationTriangleIcon } from "@heroicons/react/24/solid";
 
 // Skeleton Loader for Product Details
 const SkeletonDetail = () => (
@@ -122,19 +125,33 @@ export default function ProductDetails({
 
   if (error) {
     return (
-      <div className={`min-h-screen ${bgColor} ${textColor} py-8 text-center`}>
-        <p>Failed to load product details. Please try again later.</p>
-        <Link
-          href="/products"
-          className={`mt-4 inline-block px-6 py-2 rounded-md font-body ${
-            theme === "dark"
-              ? "bg-dark-primary hover:bg-dark-accent text-dark-text"
-              : "bg-primary hover:bg-accent text-cream"
-          } transition-all hover:scale-105`}
-        >
-          Back to Products
-        </Link>
-      </div>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="min-h-screen flex flex-col items-center justify-center p-8 text-center"
+      >
+        <div className="max-w-md space-y-6">
+          <div className="inline-flex items-center justify-center rounded-full bg-red-100 dark:bg-red-900/30 p-6">
+            <ExclamationTriangleIcon className="h-12 w-12 text-red-500 dark:text-red-400" />
+          </div>
+          <h2 className="text-3xl font-heading font-bold text-foreground">
+            Something Went Wrong
+          </h2>
+          <p className="text-lg text-muted-foreground">
+            We're having trouble loading this product details.<br/>Please check your connection
+            and try again.
+          </p>
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => window.location.reload()}
+            className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-full bg-primary text-white hover:bg-primary/90 dark:bg-dark-primary dark:hover:bg-dark-primary/90 transition-all shadow-lg hover:shadow-xl"
+          >
+            <ArrowPathIcon className="h-5 w-5" />
+            Try Again
+          </motion.button>
+        </div>
+      </motion.div>
     );
   }
 

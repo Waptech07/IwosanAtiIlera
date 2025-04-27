@@ -20,6 +20,7 @@ html {
   --color-secondary: #4d7c0f;
   --color-accent: #b45309;
   --color-training: #0f766e;
+  --color-muted-foreground: rgb(214 215 220);
 
   /* Dark Mode Colors */
   --color-dark-background: #1f2937;
@@ -28,6 +29,7 @@ html {
   --color-dark-secondary: #65a30d;
   --color-dark-accent: #d97706;
   --color-dark-training: #0d9488;
+  --color-dark-muted-foreground: rgb(156 163 175);
 
   /* Fonts */
   --font-sans: var(--font-lato);
