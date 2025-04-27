@@ -31,7 +31,7 @@ export default function ProductCard({
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
       className={`relative group rounded-2xl overflow-hidden shadow-lg ${bgColor} ${borderColor} border-2 transition-all duration-300 hover:shadow-2xl hover:-translate-y-2 backdrop-blur-sm bg-opacity-50`}

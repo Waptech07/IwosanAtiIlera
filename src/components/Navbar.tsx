@@ -63,7 +63,7 @@ export default function Navbar() {
     const handleScroll = () => {
       const scrollPosition = window.scrollY;
       const viewportHeight = window.innerHeight;
-      setIsFixed(scrollPosition > viewportHeight);
+      setIsFixed(scrollPosition > viewportHeight + 100);
     };
 
     window.addEventListener("scroll", handleScroll);

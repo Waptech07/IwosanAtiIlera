@@ -21,7 +21,7 @@ interface ProductFiltersProps {
     inStockFilter: boolean;
     sort: string;
   };
-  onFilterChange: (filters: {
+  onFilterChange(filters: {
     selectedCategory: string;
     searchInput: string;
     descInput: string;
@@ -30,7 +30,7 @@ interface ProductFiltersProps {
     inStockFilter: boolean;
     sort: string;
     page: string;
-  }) => void;
+  }): void;
   bgColor: string;
   borderColor: string;
   textColor: string;
