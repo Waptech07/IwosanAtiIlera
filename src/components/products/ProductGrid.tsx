@@ -35,7 +35,7 @@ export default function ProductGrid({
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
       {loading ? (
-        Array.from({ length: 8 }).map((_, i) => <SkeletonCard key={i} />)
+        Array.from({ length: 8 }).map((_, i) => <SkeletonCard key={i} bgColor={bgColor} borderColor={borderColor} />)
       ) : paginatedProducts.length > 0 ? (
         paginatedProducts.map((product) => (
           <ProductCard

@@ -289,7 +289,6 @@ export default function ProductFilters({
                   value={priceMin}
                   onChange={(e) => {
                     setPriceMin(e.target.value);
-                    handleFilterChange({ priceMin: e.target.value });
                   }}
                   className="absolute w-full top-0 opacity-0 cursor-pointer h-6"
                 />
@@ -301,7 +300,6 @@ export default function ProductFilters({
                   value={priceMax}
                   onChange={(e) => {
                     setPriceMax(e.target.value);
-                    handleFilterChange({ priceMax: e.target.value });
                   }}
                   className="absolute w-full top-0 opacity-0 cursor-pointer h-6"
                 />
