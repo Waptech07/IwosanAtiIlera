@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import Image from "next/image";
+import Image, { StaticImageData } from "next/image";
 import LogoImage from "@/app/images/logo.png";
 import FacebookImage from "@/app/images/facebook.png";
 import InstagramImage from "@/app/images/instagram.png";
@@ -11,6 +11,7 @@ import WhatsAppQRImage from "@/app/images/whatsappQr.png";
 import XImage from "@/app/images/x.png";
 import { useTheme } from "next-themes";
 import { motion } from "framer-motion";
+import { ArrowRightCircle } from "lucide-react";
 
 export default function Footer() {
   const { theme } = useTheme();
@@ -22,6 +23,20 @@ export default function Footer() {
 
   if (!mounted) return null;
 
+  interface SocialLink {
+    img: StaticImageData;
+    url: string;
+  }
+
+  const socialLinks: SocialLink[] = [
+    {
+      img: FacebookImage,
+      url: "https://m.facebook.com/people/Iwosan-ati-Ilera/61574149693057/",
+    },
+    { img: WhatsAppImage, url: "https://wa.link/fgfr9o" },
+    // { img: XImage, url: "https://twitter.com" },
+    // { img: InstagramImage, url: "https://instagram.com" },
+  ];
   return (
     <footer
       className={`
@@ -34,9 +49,9 @@ export default function Footer() {
       `}
     >
       <div className="container mx-auto px-4">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 lg:gap-12 mb-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12 mb-12">
           {/* Brand Section */}
-          <div className="space-y-6">
+          <div className="space-y-6 md:w-1/2">
             <motion.div
               whileHover={{ scale: 1.05 }}
               className="flex items-center gap-3"
@@ -59,7 +74,7 @@ export default function Footer() {
           </div>
 
           {/* Quick Links */}
-          <div className="md:col-span-2 lg:col-span-1">
+          <div className="md:col-span-1 lg:col-span-1">
             <h3 className="font-heading text-xl font-semibold mb-6">Explore</h3>
             <ul className="space-y-4 font-body">
               {[
@@ -73,7 +88,7 @@ export default function Footer() {
                     href={href}
                     className="group flex items-center hover:text-primary dark:hover:text-dark-primary transition-colors"
                   >
-                    <span className="h-px w-4 bg-current opacity-0 group-hover:opacity-100 transition-all mr-2" />
+                    <ArrowRightCircle className="h-4 w-4 bg-current opacity-0 group-hover:opacity-100 transition-all mr-2" />
                     {text}
                   </Link>
                 </li>
@@ -83,7 +98,7 @@ export default function Footer() {
 
           {/* Contact Info */}
           <div>
-            <h3 className="font-heading text-xl font-semibold mb-6">Connect</h3>
+            <h3 className="font-heading text-xl font-semibold mb-6">Contact Us</h3>
             <div className="space-y-4 font-body">
               <div className="flex items-center gap-3">
                 <svg
@@ -137,12 +152,7 @@ export default function Footer() {
             </h3>
             <div className="flex flex-col gap-6">
               <div className="flex gap-4">
-                {[
-                  [FacebookImage, "https://m.facebook.com/people/Iwosan-ati-Ilera/61574149693057/"],
-                  // [XImage, "https://twitter.com"],
-                  // [InstagramImage, "https://instagram.com"],
-                  [WhatsAppImage, "https://wa.me/2341234567890"],
-                ].map(([img, url], idx) => (
+                {socialLinks.map(({ img, url }, idx) => (
                   <motion.a
                     key={idx}
                     href={url}
