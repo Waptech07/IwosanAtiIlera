@@ -2,10 +2,13 @@
 
 import Link from "next/link";
 import ProductCard from "./products/ProductCard";
+import SkeletonCard from "./products/SkeletonCard";
 import { useQuery } from "@tanstack/react-query";
 import { fetchProducts, Product } from "@/lib/api";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
+import { MagnifyingGlassIcon } from "@heroicons/react/24/solid";
+import { motion } from "framer-motion";
 
 export default function FeaturedProducts() {
   const { theme } = useTheme();
@@ -43,16 +46,31 @@ export default function FeaturedProducts() {
       <h2 className={`font-heading text-3xl ${textColor} mb-8 text-center`}>
         Featured Products
       </h2>
-      {isLoading && (
-        <div className={`text-center ${textColor} font-body`}>Loading...</div>
-      )}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        {isLoading &&
+          Array.from({ length: 8 }).map((_, i) => <SkeletonCard key={i} />)}
+      </div>
       {error && (
-        <div className="text-center text-red-500 dark:text-red-400 font-body">
-          Failed to load products
-        </div>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="col-span-full py-24 text-center"
+        >
+          <div className="max-w-md mx-auto space-y-6">
+            <div className="inline-flex items-center justify-center rounded-full bg-amber-100 dark:bg-amber-900/30 p-6">
+              <MagnifyingGlassIcon className="h-12 w-12 text-amber-500 dark:text-amber-400" />
+            </div>
+            <h2 className="text-3xl font-heading font-bold text-foreground">
+              No Products Found
+            </h2>
+            <p className="text-lg text-muted-foreground">
+              We couldn't find any product. Try refreshing the page.
+            </p>
+          </div>
+        </motion.div>
       )}
       {!isLoading && !error && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {featuredProducts.map((product) => (
             <ProductCard
               key={product.id}
