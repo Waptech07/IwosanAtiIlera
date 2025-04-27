@@ -8,9 +8,10 @@ import { fetchProducts, fetchCategories, Product, Category } from "@/lib/api";
 import ProductFilters from "@/components/products/ProductFilters";
 import ProductGrid from "@/components/products/ProductGrid";
 import ProductPagination from "@/components/products/ProductPagination";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { ArrowPathIcon } from "@heroicons/react/24/solid";
 import { ExclamationTriangleIcon } from "@heroicons/react/24/solid";
+import { Sliders, X } from "lucide-react";
 
 // Force dynamic rendering to bypass prerendering
 export const dynamic = "force-dynamic";
@@ -20,6 +21,7 @@ export default function ProductsPage() {
   const searchParams = useSearchParams();
   const { theme } = useTheme();
   const [mounted, setMounted] = useState(false);
+  const [showFilters, setShowFilters] = useState(true);
 
   // Fetch products and categories using React Query
   const [productsQuery, categoriesQuery] = useQueries({
@@ -56,7 +58,7 @@ export default function ProductsPage() {
     priceRange.split("-")[0] || "0"
   );
   const [priceMax, setPriceMax] = useState<string>(
-    priceRange.split("-")[1] || "1000000"
+    priceRange.split("-")[1] || "100000"
   );
   const [inStockFilter, setInStockFilter] = useState<boolean>(
     inStock === "true"
@@ -202,46 +204,114 @@ export default function ProductsPage() {
   return (
     <div className={`min-h-screen ${bgColor} ${textColor} py-12`}>
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <h1 className={`text-5xl font-heading mb-8 ${textColor} text-center`}>
-          Our Collection
-        </h1>
-        <Suspense fallback={<div>Loading product filters...</div>}>
-          <ProductFilters
-            categories={categories}
-            initialFilters={{
-              selectedCategory,
-              searchInput,
-              descInput,
-              priceMin,
-              priceMax,
-              inStockFilter,
-              sort,
-            }}
-            onFilterChange={(newFilters) => {
-              updateFilters({
-                category: newFilters.selectedCategory,
-                search: newFilters.searchInput,
-                desc: newFilters.descInput,
-                price_range:
-                  newFilters.priceMin && newFilters.priceMax
-                    ? `${newFilters.priceMin}-${newFilters.priceMax}`
-                    : "",
-                in_stock: newFilters.inStockFilter ? "true" : "",
-                sort: newFilters.sort,
-                page: newFilters.page,
-              });
-              setSelectedCategory(newFilters.selectedCategory);
-              setSearchInput(newFilters.searchInput);
-              setDescInput(newFilters.descInput);
-              setPriceMin(newFilters.priceMin);
-              setPriceMax(newFilters.priceMax);
-              setInStockFilter(newFilters.inStockFilter);
-            }}
-            bgColor={bgColor}
-            borderColor={borderColor}
-            textColor={textColor}
-          />
-        </Suspense>
+        <div className="flex justify-between items-center mb-8">
+          <h1
+            className={`text-5xl font-heading ${textColor} text-center md:text-left`}
+          >
+            Our Collection
+          </h1>
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => setShowFilters(!showFilters)}
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl font-medium
+          ${
+            theme === "dark"
+              ? "bg-dark-primary hover:bg-dark-accent text-dark-text"
+              : "bg-primary hover:bg-accent text-cream"
+          }
+          transition-all duration-300 shadow-sm hover:shadow-md`}
+          >
+            {showFilters ? (
+              <div>
+                <X className="w-5 h-5 hidden md:block" />
+                Hide Filters
+              </div>
+            ) : (
+              <div>
+                <Sliders className="w-5 h-5 hidden md:block" />
+                Show Filters
+              </div>
+            )}
+          </motion.button>
+        </div>
+
+        <AnimatePresence initial={false}>
+          {showFilters && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
+            >
+              <Suspense
+                fallback={
+                  <div
+                    className={`mb-12 p-8 rounded-3xl ${bgColor} backdrop-blur-sm bg-opacity-50 shadow-2xl ${borderColor} border-2 animate-pulse`}
+                  >
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                      {[...Array(4)].map((_, i) => (
+                        <div
+                          key={i}
+                          className={`h-14 rounded-xl ${borderColor} ${bgColor}`}
+                        />
+                      ))}
+                    </div>
+                    <div className="mt-8 flex flex-col md:flex-row gap-6 items-center">
+                      <div className="flex-1 w-full space-y-4">
+                        <div className={`h-4 w-1/2 rounded-lg ${bgColor}`} />
+                        <div className={`h-2 rounded-full ${bgColor}`} />
+                        <div
+                          className={`h-12 w-32 ml-auto rounded-xl ${bgColor}`}
+                        />
+                      </div>
+                      <div className="flex items-center gap-4">
+                        <div className={`h-7 w-7 rounded-lg ${bgColor}`} />
+                        <div className={`h-12 w-32 rounded-xl ${bgColor}`} />
+                      </div>
+                    </div>
+                  </div>
+                }
+              >
+                <ProductFilters
+                  categories={categories}
+                  initialFilters={{
+                    selectedCategory,
+                    searchInput,
+                    descInput,
+                    priceMin,
+                    priceMax,
+                    inStockFilter,
+                    sort,
+                  }}
+                  onFilterChange={(newFilters) => {
+                    updateFilters({
+                      category: newFilters.selectedCategory,
+                      search: newFilters.searchInput,
+                      desc: newFilters.descInput,
+                      price_range:
+                        newFilters.priceMin && newFilters.priceMax
+                          ? `${newFilters.priceMin}-${newFilters.priceMax}`
+                          : "",
+                      in_stock: newFilters.inStockFilter ? "true" : "",
+                      sort: newFilters.sort,
+                      page: newFilters.page,
+                    });
+                    setSelectedCategory(newFilters.selectedCategory);
+                    setSearchInput(newFilters.searchInput);
+                    setDescInput(newFilters.descInput);
+                    setPriceMin(newFilters.priceMin);
+                    setPriceMax(newFilters.priceMax);
+                    setInStockFilter(newFilters.inStockFilter);
+                  }}
+                  bgColor={bgColor}
+                  borderColor={borderColor}
+                  textColor={textColor}
+                />
+              </Suspense>
+            </motion.div>
+          )}
+        </AnimatePresence>
         <ProductGrid
           loading={loading}
           paginatedProducts={paginatedProducts}
@@ -253,7 +323,7 @@ export default function ProductsPage() {
             setSearchInput("");
             setDescInput("");
             setPriceMin("0");
-            setPriceMax("1000000");
+            setPriceMax("100000");
             setInStockFilter(false);
             updateFilters({
               category: "",

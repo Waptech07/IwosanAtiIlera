@@ -15,8 +15,8 @@ export default function ClientQueryProvider({
       new QueryClient({
         defaultOptions: {
           queries: {
-            staleTime: 5 * 60 * 1000, // 5 minutes
-            gcTime: 10 * 60 * 1000, // 10 minutes
+            staleTime: 20 * 60 * 1000, // 5 minutes
+            gcTime: 40 * 60 * 1000, // 10 minutes
             retry: 1, // Retry failed requests once
           },
         },

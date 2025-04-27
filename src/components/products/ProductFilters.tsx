@@ -94,7 +94,7 @@ export default function ProductFilters({
     setSearchInput("");
     setDescInput("");
     setPriceMin("0");
-    setPriceMax("1000000");
+    setPriceMax("100000");
     setInStockFilter(false);
     setSort("");
     onFilterChange({
@@ -102,7 +102,7 @@ export default function ProductFilters({
       searchInput: "",
       descInput: "",
       priceMin: "0",
-      priceMax: "1000000",
+      priceMax: "100000",
       inStockFilter: false,
       sort: "",
       page: "1",
@@ -276,7 +276,7 @@ export default function ProductFilters({
                   className="absolute h-2 bg-primary dark:bg-dark-primary rounded-full"
                   style={{
                     left: `${(parseInt(priceMin) / 20000) * 100}%`,
-                    right: `${100 - (parseInt(priceMax) / 1000000) * 100}%`,
+                    right: `${100 - (parseInt(priceMax) / 100000) * 100}%`,
                   }}
                 />
               </div>
@@ -297,7 +297,7 @@ export default function ProductFilters({
                   title="priceMax"
                   type="range"
                   min="0"
-                  max="1000000"
+                  max="100000"
                   value={priceMax}
                   onChange={(e) => {
                     setPriceMax(e.target.value);
