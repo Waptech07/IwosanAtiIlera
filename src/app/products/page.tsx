@@ -203,34 +203,43 @@ export default function ProductsPage() {
 
   return (
     <div className={`min-h-screen ${bgColor} ${textColor} py-12`}>
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center mb-8">
+      <div className="container mx-auto px-4 xs:px-5 sm:px-6 lg:px-8">
+        <div className="flex flex-row justify-between items-center gap-3 sm:gap-4 mb-6 sm:mb-8">
           <h1
-            className={`text-5xl font-heading ${textColor} text-center md:text-left`}
+            className={`text-3xl sm:text-4xl lg:text-5xl font-heading ${textColor} text-center sm:text-left transition-colors`}
           >
             Our Collection
           </h1>
+
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => setShowFilters(!showFilters)}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl font-medium
-          ${
-            theme === "dark"
-              ? "bg-dark-primary hover:bg-dark-accent text-dark-text"
-              : "bg-primary hover:bg-accent text-cream"
-          }
-          transition-all duration-300 shadow-sm hover:shadow-md`}
+            className={`
+      flex items-center justify-center gap-1.5 sm:gap-2 
+      px-3 sm:px-4 py-2 
+      rounded-lg sm:rounded-xl 
+      font-medium
+      ${
+        theme === "dark"
+          ? "bg-dark-primary hover:bg-dark-accent text-dark-text"
+          : "bg-primary hover:bg-accent text-cream"
+      }
+      transition-all duration-300 
+      shadow-sm hover:shadow-md 
+      text-sm sm:text-base
+      min-w-[48px] sm:min-w-fit
+    `}
           >
             {showFilters ? (
-              <div>
-                <X className="w-5 h-5 hidden md:block" />
-                Hide Filters
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <X className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
+                <span className="hidden sm:inline">Hide Filters</span>
               </div>
             ) : (
-              <div>
-                <Sliders className="w-5 h-5 hidden md:block" />
-                Show Filters
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <Sliders className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
+                <span className="hidden sm:inline">Show Filters</span>
               </div>
             )}
           </motion.button>
